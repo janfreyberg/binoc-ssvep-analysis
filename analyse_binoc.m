@@ -9,16 +9,13 @@ cfg.refchannel = 'all';
 
 %% Trial definition
 fileID = 'EG-CTR-0008-BinSSVEP.bdf';
-fileparts
-cfg.dataset = fullfile(pwd, 'EEG Feb 2015', fileID);
+cfg.dataset = fullfile('E:\Documents\Recorded Data\EEG Feb 2015', fileID);
 cfg.channel = 1:64;
 
 cfg.trialdef.eventtype = 'STATUS';
 cfg.trialfun = 'ft_trialfun_general';
 cfg.trialdef.prestim = 2;
 cfg.trialdef.poststim = 15.5;
-
-cfg.feedback = 'no';
 
 trial_data = cell(1, 16);
 for eventvalue = 1:16;
@@ -38,11 +35,12 @@ end
 %% TFR Parameters
 cfg = [];
 cfg.toi = -2:0.05:15.5;
-cfg.foi = 24.8:0.4:40;
+% cfg.foi = 24.8:0.4:40;
+cfg.foi = [28.8, 36];
 
 cfg.output = 'pow';
 cfg.method = 'wavelet'; % other option would be multi-taper-convolution ('mtmconvol')
-cfg.width = 30; % width of the wavelet window in terms of wave cycles
+cfg.width = 20; % width of the wavelet window in terms of wave cycles
 
 freq = cell(1, 16);
 
@@ -71,7 +69,7 @@ for eventvalue = 1:16
     
     % zscore transformation
     zscfreq{eventvalue} = relfreq{eventvalue};
-    zscfreq{eventvalue}.powspctrm = zscore(zscfreq{eventvalue}.powspctrm, 0, 3);
+    zscfreq{eventvalue}.powspctrm = zscore_transform(zscfreq{eventvalue}.powspctrm);
     
     % scaling by maximum
     maxfreq{eventvalue} = relfreq{eventvalue};
@@ -79,7 +77,53 @@ for eventvalue = 1:16
     
 end
 
+
+
+%% Compare zscore & max correction
+% heatmaps
+figure;
+cfg = [];
+cfg.baseline = 'no';
+
+cfg.channel = freq{1}.label(62:64);
+
+cfg.showlabels = 'yes';
+cfg.layout = 'biosemi64.lay';
+
+subplot(3, 1, 1);
+ft_singleplotTFR(cfg, relfreq{1});
+
+subplot(3, 1, 2);
+ft_singleplotTFR(cfg, zscfreq{1});
+
+subplot(3, 1, 3);
+ft_singleplotTFR(cfg, maxfreq{1});
+
+% line plot
+figure;
+
+x = freq{1}.time;
+channels = 62:64;
+
+subplot(3, 1, 1);
+y28 = squeeze(mean(relfreq{1}.powspctrm(channels, index28, :), 1));
+y36 = squeeze(mean(relfreq{1}.powspctrm(channels, index36, :), 1));
+plot(x, y28, 'b', x, y36, 'g', x, y28-y36, 'r');
+
+subplot(3, 1, 2);
+y28 = squeeze(mean(zscfreq{1}.powspctrm(channels, index28, :), 1));
+y36 = squeeze(mean(zscfreq{1}.powspctrm(channels, index36, :), 1));
+plot(x, y28, 'b', x, y36, 'g', x, y28-y36, 'r');
+
+subplot(3, 1, 3);
+y28 = squeeze(mean(maxfreq{1}.powspctrm(channels, index28, :), 1));
+y36 = squeeze(mean(maxfreq{1}.powspctrm(channels, index36, :), 1));
+plot(x, y28, 'b', x, y36, 'g', x, y28-y36, 'r');
+
+
 hhh;
+
+
 
 %% Plots
 cfg = [];
