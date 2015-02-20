@@ -7,7 +7,7 @@ cfg.detrend = 'yes';
 cfg.reref = '1:64';
 cfg.refchannel = 'all';
 
-%% Trial definition
+%% Trial definition & preprocessing
 fileID = 'EG-CTR-0008-BinSSVEP.bdf';
 cfg.dataset = fullfile('E:\Documents\Recorded Data\EEG Feb 2015', fileID);
 cfg.channel = 1:64;
@@ -15,7 +15,7 @@ cfg.channel = 1:64;
 cfg.trialdef.eventtype = 'STATUS';
 cfg.trialfun = 'ft_trialfun_general';
 cfg.trialdef.prestim = 2;
-cfg.trialdef.poststim = 15.5;
+cfg.trialdef.poststim = 15.5; %actual length of trial 12 s
 
 trial_data = cell(1, 16);
 for eventvalue = 1:16;
@@ -31,6 +31,29 @@ for eventvalue = 1:16;
     trial_data{eventvalue} = ft_preprocessing(cfg);
     
 end
+
+%% Button Press from trigger data
+
+button_data = cell(1, 16);
+for trialNo = 1:16;
+    cfg = [];
+    fileID = 'EG-CTR-0008-BinSSVEP.bdf';
+    cfg.dataset = fullfile('E:\Documents\Recorded Data\EEG Feb 2015', fileID);
+    cfg.trialdef.eventvalue = 1:8;
+    cfg.trialdef.eventtype = 'STATUS';
+    cfg.trialfun = 'ft_trialfun_general';
+    
+    cfg = ft_definetrial(cfg);
+    
+    % only take the buttonpresses within current trial
+    trl_start = trial_data{trialNo}.sampleinfo(1) + trial_data{trialNo}.fsample* 2;
+    trl_end = trial_data{trialNo}.sampleinfo(1) + trial_data{trialNo}.fsample* (2+12);
+    cfg.trl(cfg.trl(:, 1) < trl_start | cfg.trl(:, 1) > trl_end, :) = [];
+    
+    button_data{trialNo} = cfg.trl;
+    
+end
+hhh;
 
 %% TFR Parameters
 cfg = [];
@@ -76,7 +99,6 @@ for eventvalue = 1:16
     maxfreq{eventvalue}.powspctrm = maxtransform(maxfreq{eventvalue}.powspctrm);
     
 end
-
 
 
 %% Compare zscore & max correction
