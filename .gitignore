@@ -3,8 +3,9 @@
 #################
 *.bdf
 
-## Matlab autosaves
+## Matlab autosaves and files
 *.asv
+*.mat
 
 #################
 ## Eclipse

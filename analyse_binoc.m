@@ -80,25 +80,30 @@ end
 
 
 %% Compare zscore & max correction
+
+plttrl = 3;
+
 % heatmaps
 figure;
 cfg = [];
 cfg.baseline = 'no';
 
-cfg.channel = freq{1}.label(62:64);
+cfg.channel = freq{plttrl}.label(62:64);
 
 cfg.showlabels = 'yes';
 cfg.layout = 'biosemi64.lay';
 
 subplot(3, 1, 1);
-ft_singleplotTFR(cfg, relfreq{1});
+ft_singleplotTFR(cfg, relfreq{plttrl});
+title('No transform');
 
 subplot(3, 1, 2);
-ft_singleplotTFR(cfg, zscfreq{1});
+ft_singleplotTFR(cfg, zscfreq{plttrl});
+title('Z-Score Transformation');
 
 subplot(3, 1, 3);
-ft_singleplotTFR(cfg, maxfreq{1});
-
+ft_singleplotTFR(cfg, maxfreq{plttrl});
+title('Divide by maximum');
 % line plot
 figure;
 
@@ -106,54 +111,26 @@ x = freq{1}.time;
 channels = 62:64;
 
 subplot(3, 1, 1);
-y28 = squeeze(mean(relfreq{1}.powspctrm(channels, index28, :), 1));
-y36 = squeeze(mean(relfreq{1}.powspctrm(channels, index36, :), 1));
+y28 = squeeze(mean(relfreq{plttrl}.powspctrm(channels, index28, :), 1));
+y36 = squeeze(mean(relfreq{plttrl}.powspctrm(channels, index36, :), 1));
 plot(x, y28, 'b', x, y36, 'g', x, y28-y36, 'r');
+title('No transform');
 
 subplot(3, 1, 2);
-y28 = squeeze(mean(zscfreq{1}.powspctrm(channels, index28, :), 1));
-y36 = squeeze(mean(zscfreq{1}.powspctrm(channels, index36, :), 1));
+y28 = squeeze(mean(zscfreq{plttrl}.powspctrm(channels, index28, :), 1));
+y36 = squeeze(mean(zscfreq{plttrl}.powspctrm(channels, index36, :), 1));
 plot(x, y28, 'b', x, y36, 'g', x, y28-y36, 'r');
+title('Z-Score Transformation');
 
 subplot(3, 1, 3);
-y28 = squeeze(mean(maxfreq{1}.powspctrm(channels, index28, :), 1));
-y36 = squeeze(mean(maxfreq{1}.powspctrm(channels, index36, :), 1));
+y28 = squeeze(mean(maxfreq{plttrl}.powspctrm(channels, index28, :), 1));
+y36 = squeeze(mean(maxfreq{plttrl}.powspctrm(channels, index36, :), 1));
 plot(x, y28, 'b', x, y36, 'g', x, y28-y36, 'r');
+title('Divide by maximum');
 
 
 hhh;
 
-
-
-%% Plots
-cfg = [];
-cfg.baseline     = [-2 -0.5];
-cfg.baselinetype = 'relchange';
-% cfg.zlim         = [0 15];
-cfg.channel = freq.label(1:64);
-cfg.showlabels   = 'yes';
-cfg.layout       = 'biosemi64.lay';
-% figure;
-% ft_multiplotTFR(cfg, freq);
-
-cfg.channel = freq.label(62:64);
-figure;
-ft_singleplotTFR(cfg, freq);
-
-
-relFreq = ft_freqbaseline(cfg, freq);
-
-pow36 = squeeze(relFreq.powspctrm(29, 29, :));
-pow28 = squeeze(relFreq.powspctrm(29, 11, :));
-
-% figure;
-% plot(freq.time, pow36)
-% hold on
-% plot(freq.time, pow28, 'r')
-
-% subplot(diffFig{iTrials});
-% hold on
-% plot(freq.time, pow36 - pow28);
 
 
 %% ICA
@@ -191,31 +168,3 @@ ft_topoplotIC(cfg, comp);
 % 
 
 
-
-
-%% Analyse all trials together
-
-% cfg.trialdef.eventvalue = [12, 22];
-% 
-% cfg = ft_definetrial(cfg);
-% loaded_data = ft_preprocessing(cfg);
-% 
-% cfg.toi = -2:0.05:14;
-% cfg.foi = 26:0.4:40;
-% 
-% cfg.output       = 'pow';
-% cfg.method       = 'mtmconvol';
-% cfg.taper        = 'hanning';
-% 
-% cfg.t_ftimwin    = ones(length(cfg.foi),1).*0.5;
-% freq = ft_freqanalysis(cfg, loaded_data);
-
-%% Multiplot
-% cfg.baseline     = [-1 0]; 
-% cfg.baselinetype = 'relative'; 
-% cfg.zlim         = [0 15];	        
-% cfg.channel = freq.label(1:64);
-% cfg.showlabels   = 'yes';
-% cfg.layout       = 'biosemi64.lay';
-% figure;
-% ft_multiplotTFR(cfg, freq);
