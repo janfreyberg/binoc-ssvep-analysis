@@ -104,13 +104,19 @@ end
 
 %% TFR Parameters
 cfg = [];
-cfg.toi = -2:0.05:15.5;
+
 % cfg.foi = 24.8:0.4:40;
 cfg.foi = [28.8, 36];
 
 cfg.output = 'pow';
-cfg.method = 'wavelet'; % other option would be multi-taper-convolution ('mtmconvol')
+cfg.method = 'mtmconvol'; % other option would be multi-taper-convolution ('mtmconvol')
+cfg.taper = 'hanning';
+
+cfg.t_ftimwin = ones(size(cfg.foi)) * ( 4 * 1/7.2 );
+
 cfg.width = cfg.foi/2; % width of the wavelet window in terms of wave cycles
+
+cfg.toi = -2:( 4 * 1/7.2 ):15.5;
 
 freq = cell(1, 16);
 
@@ -193,14 +199,35 @@ y36 = squeeze(mean(zscfreq{plttrl}.powspctrm(channels, index36, :), 1));
 plot(x, y28, 'b--', x, y36, 'g--', x, y28-y36, 'r', button_time{plttrl}, button_sum{plttrl}, 'm');
 % title('Z-Score Transformation');
 
+
 % subplot(3, 1, 3);
-% y28 = squeeze(mean(maxfreq{plttrl}.powspctrm(channels, index28, :), 1));
-% y36 = squeeze(mean(maxfreq{plttrl}.powspctrm(channels, index36, :), 1));
+y28 = squeeze(nanmean(maxfreq{plttrl}.powspctrm(channels, index28, :), 1));
+y36 = squeeze(nanmean(maxfreq{plttrl}.powspctrm(channels, index36, :), 1));
 % plot(x, y28, 'b--', x, y36, 'g--', x, y28-y36, 'r', button_time{plttrl}, button_sum{plttrl}, 'm');
 % title('Divide by maximum');
 
+
+
 end
 hhh;
+
+
+
+%% Analyse correlation between two frequencies
+for trl = 1:16
+
+% Identify stimulated timecourse
+x = freq{1}.time( freq{1}.time > 0 & freq{1}.time < 12 );
+
+pow28 = squeeze(nanmean(maxfreq{trl}.powspctrm(channels, index28, ( freq{1}.time > 0 & freq{1}.time < 12 )), 1));
+pow36 = squeeze(nanmean(maxfreq{trl}.powspctrm(channels, index36, ( freq{1}.time > 0 & freq{1}.time < 12 )), 1));
+
+[r, p] = corrcoef(pow28, pow36);
+disp(['Trial ' num2str(trl)])
+disp(['r=' num2str(r(2)) ' p=' num2str(p(2))])
+
+end
+
 
 
 %% ICA
