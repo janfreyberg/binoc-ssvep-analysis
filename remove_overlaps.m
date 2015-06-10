@@ -1,17 +1,18 @@
-function trl = remove_overlaps(trl)
+function trl = remove_overlaps(cfg)
 
 % remove any mistaken trials
 kickOut = [];
-if size(trl, 1) > 1
+if size(cfg.trl, 1) > 1
     kickOut(1, 1) = false;
-    for i = 2:size(trl, 1)
-        if trl(i, 1) <= trl(i-1, 1) + 12*1024
+    for i = 2:size(cfg.trl, 1)
+        if ~kickOut(i-1, 1) && cfg.trl(i, 1) + cfg.trialdef.prestim*1024 <= cfg.trl(i-1, 1) + cfg.trialdef.prestim*1024 + 12*1024
             kickOut(i, 1) = true; %#ok<*AGROW>
         else
             kickOut(i, 1) = false;
         end
     end
-    trl(logical(kickOut), :) = [];
+    cfg.trl(logical(kickOut), :) = [];
 end
 
+trl = cfg.trl;
 end
